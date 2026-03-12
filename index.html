@@ -2094,53 +2094,84 @@
   </div>
 
   <!-- Main content -->
-  <div style="max-width:900px;margin:0 auto;padding:2.5rem 2rem;">
+  <div style="max-width:1100px;margin:0 auto;padding:2.5rem 2rem;">
     
-    <!-- Student Info Card -->
-    <div id="student-info-card" style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:2rem;margin-bottom:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;">
-      <div>
-        <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--teal),#0d3535);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem;">👤</div>
-        <p id="stu-name-display" style="font-size:1.1rem;font-weight:700;color:var(--text-main);margin-bottom:0.3rem;">---</p>
-        <p id="stu-id-display" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">---</p>
-        <p id="stu-major-display" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.25rem;">---</p>
-        <p id="stu-year-display" style="font-size:0.85rem;color:var(--text-muted);">---</p>
-      </div>
-      <div>
-        <h3 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:1.25rem;">🔔 حالة التسجيل</h3>
-        <div id="status-box" style="background:var(--parchment);border-radius:10px;padding:1.5rem;border-left:4px solid var(--gold);"></div>
-      </div>
+    <!-- Navigation Tabs -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:2rem;border-bottom:2px solid var(--parchment-dark);flex-wrap:wrap;">
+      <button id="stu-tab-status" onclick="switchStuTab('status')" style="padding:0.75rem 1.5rem;background:var(--teal);color:#fff;border:none;border-radius:8px 8px 0 0;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📋 حالتك</button>
+      <button id="stu-tab-lectures" onclick="switchStuTab('lectures')" style="padding:0.75rem 1.5rem;background:transparent;color:var(--text-muted);border:none;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📖 المحاضرات</button>
+      <button id="stu-tab-exams" onclick="switchStuTab('exams')" style="padding:0.75rem 1.5rem;background:transparent;color:var(--text-muted);border:none;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📝 الاختبارات</button>
+      <button id="stu-tab-discussion" onclick="switchStuTab('discussion')" style="padding:0.75rem 1.5rem;background:transparent;color:var(--text-muted);border:none;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;">💬 النقاش</button>
     </div>
 
-    <!-- Status Details -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-      <!-- Registration Status -->
-      <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.5rem;">
-        <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;"><span>📋</span> تفاصيل التسجيل</h3>
-        <div style="display:flex;flex-direction:column;gap:0.75rem;">
-          <div style="display:flex;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--parchment);border-radius:8px;">
-            <span style="font-size:0.85rem;color:var(--text-muted);">تاريخ التسجيل:</span>
-            <span id="stu-reg-date" style="font-weight:700;color:var(--text-main);font-size:0.85rem;">---</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--parchment);border-radius:8px;">
-            <span style="font-size:0.85rem;color:var(--text-muted);">البريد الإلكتروني:</span>
-            <span id="stu-email-display" style="font-weight:600;color:var(--text-main);font-size:0.85rem;">---</span>
-          </div>
-          <div id="status-timestamp" style="display:flex;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--parchment);border-radius:8px;">
-            <span style="font-size:0.85rem;color:var(--text-muted);">تاريخ التحديث:</span>
-            <span id="stu-status-time" style="font-weight:600;color:var(--text-main);font-size:0.85rem;">---</span>
-          </div>
+    <!-- Status Section -->
+    <div id="stu-section-status" style="display:block;">
+      <!-- Student Info Card -->
+      <div id="student-info-card" style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:2rem;margin-bottom:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;">
+        <div>
+          <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--teal),#0d3535);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem;">👤</div>
+          <p id="stu-name-display" style="font-size:1.1rem;font-weight:700;color:var(--text-main);margin-bottom:0.3rem;">---</p>
+          <p id="stu-id-display" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">---</p>
+          <p id="stu-major-display" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.25rem;">---</p>
+          <p id="stu-year-display" style="font-size:0.85rem;color:var(--text-muted);">---</p>
+        </div>
+        <div>
+          <h3 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:1.25rem;">🔔 حالة التسجيل</h3>
+          <div id="status-box" style="background:var(--parchment);border-radius:10px;padding:1.5rem;border-left:4px solid var(--gold);"></div>
         </div>
       </div>
 
-      <!-- What's Next -->
-      <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.5rem;">
-        <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;"><span>⚡</span> الخطوات التالية</h3>
-        <div id="next-steps" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+      <!-- Status Details -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <!-- Registration Status -->
+        <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.5rem;">
+          <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;"><span>📋</span> تفاصيل التسجيل</h3>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--parchment);border-radius:8px;">
+              <span style="font-size:0.85rem;color:var(--text-muted);">تاريخ التسجيل:</span>
+              <span id="stu-reg-date" style="font-weight:700;color:var(--text-main);font-size:0.85rem;">---</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--parchment);border-radius:8px;">
+              <span style="font-size:0.85rem;color:var(--text-muted);">البريد الإلكتروني:</span>
+              <span id="stu-email-display" style="font-weight:600;color:var(--text-main);font-size:0.85rem;">---</span>
+            </div>
+            <div id="status-timestamp" style="display:flex;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--parchment);border-radius:8px;">
+              <span style="font-size:0.85rem;color:var(--text-muted);">تاريخ التحديث:</span>
+              <span id="stu-status-time" style="font-weight:600;color:var(--text-main);font-size:0.85rem;">---</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- What's Next -->
+        <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.5rem;">
+          <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;"><span>⚡</span> الخطوات التالية</h3>
+          <div id="next-steps" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+        </div>
       </div>
+
+      <!-- Full Status Message -->
+      <div id="full-status-message" style="margin-top:2rem;background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:2rem;text-align:center;"></div>
     </div>
 
-    <!-- Full Status Message -->
-    <div id="full-status-message" style="margin-top:2rem;background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:2rem;text-align:center;"></div>
+    <!-- Lectures Section -->
+    <div id="stu-section-lectures" style="display:none;">
+      <h2 style="font-size:1.3rem;font-weight:700;color:var(--text-main);margin-bottom:1.5rem;">📖 المحاضرات المتاحة</h2>
+      <div id="stu-lectures-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;"></div>
+    </div>
+
+    <!-- Exams Section -->
+    <div id="stu-section-exams" style="display:none;">
+      <h2 style="font-size:1.3rem;font-weight:700;color:var(--text-main);margin-bottom:1.5rem;">📝 الاختبارات المتاحة</h2>
+      <div id="stu-exams-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;"></div>
+    </div>
+
+    <!-- Discussion Section -->
+    <div id="stu-section-discussion" style="display:none;">
+      <h2 style="font-size:1.3rem;font-weight:700;color:var(--text-main);margin-bottom:1.5rem;">💬 منتدى النقاش</h2>
+      <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:2rem;text-align:center;">
+        <p style="font-size:1rem;color:var(--text-muted);">🚧 قريباً: منتدى النقاش قيد التطوير</p>
+      </div>
+    </div>
 
   </div><!-- end main content -->
 </div><!-- end student-dashboard -->
@@ -2783,6 +2814,110 @@
     }, (error) => {
       console.error('Firebase read error:', error);
     });
+
+    // Also listen to lectures and exams changes
+    loadLecturesFromFirebase();
+    loadExamsFromFirebase();
+  }
+
+  // Sync lectures to Firebase
+  function syncLecturesToFirebase() {
+    if (!useFirebase || !firebaseConnected || !database) {
+      console.log('Firebase not connected, skipping lecture sync');
+      return;
+    }
+
+    const firebaseData = {};
+    let index = 0;
+    for (const course in lectures) {
+      lectures[course].forEach(lec => {
+        firebaseData[index] = { ...lec, course };
+        index++;
+      });
+    }
+
+    database.ref('lectures').set(firebaseData).catch(err => {
+      console.error('Firebase lecture sync error:', err);
+    });
+  }
+
+  // Load lectures from Firebase (real-time listener for students)
+  function loadLecturesFromFirebase() {
+    if (!useFirebase || !database) return;
+
+    database.ref('lectures').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Reset lectures object
+        const tempLectures = { nahw: [], sarf: [] };
+        
+        // Rebuild lectures from Firebase
+        const lectureArray = Array.isArray(data) ? data : Object.values(data);
+        lectureArray.forEach(lec => {
+          if (lec && lec.course && tempLectures[lec.course]) {
+            tempLectures[lec.course].push(lec);
+          }
+        });
+
+        // Sort by number
+        for (const course in tempLectures) {
+          tempLectures[course].sort((a, b) => a.num - b.num);
+        }
+
+        // Update global lectures object
+        Object.assign(lectures, tempLectures);
+        
+        console.log('Lectures loaded from Firebase:', lectures);
+
+        // Re-render if student dashboard is open
+        const lecContainer = document.getElementById('stu-lectures-list');
+        if (lecContainer && lecContainer.style.display !== 'none') {
+          renderStudentLectures();
+        }
+      }
+    }, (error) => {
+      console.error('Firebase lectures read error:', error);
+    });
+  }
+
+  // Sync exams to Firebase
+  function syncExamsToFirebase() {
+    if (!useFirebase || !firebaseConnected || !database) {
+      console.log('Firebase not connected, skipping exams sync');
+      return;
+    }
+
+    const firebaseData = {};
+    exams.forEach((exam, index) => {
+      firebaseData[index] = exam;
+    });
+
+    database.ref('exams').set(firebaseData).catch(err => {
+      console.error('Firebase exams sync error:', err);
+    });
+  }
+
+  // Load exams from Firebase (real-time listener for students)
+  function loadExamsFromFirebase() {
+    if (!useFirebase || !database) return;
+
+    database.ref('exams').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const examsArray = Array.isArray(data) ? data : Object.values(data);
+        exams = examsArray.filter(e => e && typeof e === 'object');
+        
+        console.log('Exams loaded from Firebase:', exams);
+
+        // Re-render if student dashboard is open
+        const examContainer = document.getElementById('stu-exams-list');
+        if (examContainer && examContainer.style.display !== 'none') {
+          renderStudentExams();
+        }
+      }
+    }, (error) => {
+      console.error('Firebase exams read error:', error);
+    });
   }
 
   // Load data on page load
@@ -3034,6 +3169,9 @@
     currentCourse = course;
     switchCourse(course);
     closeLectureModal();
+    
+    // Sync lectures to Firebase
+    syncLecturesToFirebase();
   }
 
   // FILE HANDLING
@@ -3138,7 +3276,10 @@
     const title=document.getElementById('exam-title-inp').value.trim();
     if(!title){showToast('⚠️ يُرجى إدخال عنوان الاختبار');return;}
     exams.push({id:nextExamId++,title,course:document.getElementById('exam-course-inp').value,duration:parseInt(document.getElementById('exam-duration').value)||30,lecture:document.getElementById('exam-lecture-inp').value,date:new Date().toISOString().split('T')[0],active:true});
-    renderExamsList();closeExamModal();showToast('✅ تم إنشاء الاختبار بنجاح');
+    renderExamsList();
+    syncExamsToFirebase();
+    closeExamModal();
+    showToast('✅ تم إنشاء الاختبار بنجاح');
   }
 
   // QUESTION BANK
@@ -3248,8 +3389,18 @@
   function executeDeletion(){
     if(!pendingDelete) return;
     const{type,id}=pendingDelete;
-    if(type==='lecture'){['nahw','sarf'].forEach(c=>{lectures[c]=lectures[c].filter(l=>l.id!==id);});renderLectures();showToast('🗑️ تم حذف المحاضرة');}
-    else if(type==='exam'){exams=exams.filter(e=>e.id!==id);renderExamsList();showToast('🗑️ تم حذف الاختبار');}
+    if(type==='lecture'){
+      ['nahw','sarf'].forEach(c=>{lectures[c]=lectures[c].filter(l=>l.id!==id);});
+      renderLectures();
+      syncLecturesToFirebase();
+      showToast('🗑️ تم حذف المحاضرة');
+    }
+    else if(type==='exam'){
+      exams=exams.filter(e=>e.id!==id);
+      renderExamsList();
+      syncExamsToFirebase();
+      showToast('🗑️ تم حذف الاختبار');
+    }
     else if(type==='question'){questions=questions.filter(q=>q.id!==id);renderQuestionBank();showToast('🗑️ تم حذف السؤال');}
     closeDeleteModal();
   }
@@ -3729,12 +3880,118 @@
       document.getElementById('status-timestamp').style.display = 'flex';
       document.getElementById('stu-status-time').textContent = student.date + ' 🚫 مرفوض';
     }
+
+    // Initialize the first tab
+    switchStuTab('status');
   }
 
   function studentLogout() {
     document.getElementById('student-dashboard').style.display = 'none';
     document.body.style.overflow = '';
     showToast('👋 تم تسجيل الخروج بنجاح');
+  }
+
+  function switchStuTab(tab) {
+    // Hide all sections
+    document.getElementById('stu-section-status').style.display = 'none';
+    document.getElementById('stu-section-lectures').style.display = 'none';
+    document.getElementById('stu-section-exams').style.display = 'none';
+    document.getElementById('stu-section-discussion').style.display = 'none';
+
+    // Reset all tab buttons
+    const buttons = [
+      document.getElementById('stu-tab-status'),
+      document.getElementById('stu-tab-lectures'),
+      document.getElementById('stu-tab-exams'),
+      document.getElementById('stu-tab-discussion')
+    ];
+    buttons.forEach(btn => {
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--text-muted)';
+      btn.style.borderRadius = '0';
+    });
+
+    // Show selected section and highlight tab
+    if (tab === 'status') {
+      document.getElementById('stu-section-status').style.display = 'block';
+      document.getElementById('stu-tab-status').style.background = 'var(--teal)';
+      document.getElementById('stu-tab-status').style.color = '#fff';
+      document.getElementById('stu-tab-status').style.borderRadius = '8px 8px 0 0';
+    } else if (tab === 'lectures') {
+      document.getElementById('stu-section-lectures').style.display = 'block';
+      document.getElementById('stu-tab-lectures').style.background = 'var(--teal)';
+      document.getElementById('stu-tab-lectures').style.color = '#fff';
+      document.getElementById('stu-tab-lectures').style.borderRadius = '8px 8px 0 0';
+      renderStudentLectures();
+    } else if (tab === 'exams') {
+      document.getElementById('stu-section-exams').style.display = 'block';
+      document.getElementById('stu-tab-exams').style.background = 'var(--teal)';
+      document.getElementById('stu-tab-exams').style.color = '#fff';
+      document.getElementById('stu-tab-exams').style.borderRadius = '8px 8px 0 0';
+      renderStudentExams();
+    } else if (tab === 'discussion') {
+      document.getElementById('stu-section-discussion').style.display = 'block';
+      document.getElementById('stu-tab-discussion').style.background = 'var(--teal)';
+      document.getElementById('stu-tab-discussion').style.color = '#fff';
+      document.getElementById('stu-tab-discussion').style.borderRadius = '8px 8px 0 0';
+    }
+  }
+
+  function renderStudentLectures() {
+    const container = document.getElementById('stu-lectures-list');
+    
+    // Get all lectures from all courses
+    const allLectures = [];
+    for (const course in lectures) {
+      lectures[course].forEach(lec => {
+        allLectures.push({ ...lec, course });
+      });
+    }
+
+    if (allLectures.length === 0) {
+      container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);">لا توجد محاضرات متاحة حالياً</p>';
+      return;
+    }
+
+    container.innerHTML = allLectures.map(lec => `
+      <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:12px;padding:1.5rem;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.boxShadow='0 4px 12px var(--shadow)'" onmouseout="this.style.boxShadow='none'">
+        <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:0.5rem;">المحاضرة ${lec.num}: ${lec.title}</h3>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">📅 ${lec.date}</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem;min-height:2.5rem;">${lec.summary}</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          ${lec.file ? `<button onclick="alert('📄 الملف المرفق:\\n${lec.file}\\n\\nالتحميل قريباً')" style="background:var(--gold);color:var(--ink);border:none;padding:0.5rem 1rem;border-radius:6px;font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;transition:all 0.2s;font-weight:600;" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">📥 الملف</button>` : ''}
+          ${lec.video ? `<button onclick="window.open('${lec.video}','_blank')" style="background:var(--teal);color:#fff;border:none;padding:0.5rem 1rem;border-radius:6px;font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;transition:all 0.2s;font-weight:600;" onmouseover="this.style.background:var(--teal-light)" onmouseout="this.style.background:'var(--teal)'">▶️ فيديو</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderStudentExams() {
+    const container = document.getElementById('stu-exams-list');
+    
+    const activeExams = exams.filter(e => e.active);
+
+    if (activeExams.length === 0) {
+      container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);">لا توجد اختبارات متاحة حالياً</p>';
+      return;
+    }
+
+    container.innerHTML = activeExams.map(exam => `
+      <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:12px;padding:1.5rem;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.boxShadow='0 4px 12px var(--shadow)'" onmouseout="this.style.boxShadow='none'">
+        <h3 style="font-size:0.95rem;font-weight:700;color:var(--text-main);margin-bottom:0.5rem;">⏱️ ${exam.title}</h3>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;">المحاضرة: ${exam.lecture}</p>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;">المدة: ${exam.duration} دقيقة</p>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">📅 ${exam.date}</p>
+        <button onclick="startExam(${exam.id})" style="background:var(--teal);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;font-family:'Cairo',sans-serif;font-size:0.9rem;cursor:pointer;transition:all 0.2s;font-weight:700;width:100%;" onmouseover="this.style.background='var(--teal-light)'" onmouseout="this.style.background='var(--teal)'">ابدأ الاختبار 🚀</button>
+      </div>
+    `).join('');
+  }
+
+  function startExam(examId) {
+    const exam = exams.find(e => e.id === examId);
+    if (!exam) return;
+    showToast(`🚀 بدء اختبار: ${exam.title}`);
+    // TODO: Implement exam interface
   }
 
   // Smooth scroll
