@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI شريك لاا بديل للإنسان | منصة علوم العربية</title>
+<title>AI شريك لا بديل للإنسان | منصة علوم العربية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;900&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 <script>
   (function(){
     emailjs.init({ publicKey: "qoNDx6Phq2D94Gfug" });
@@ -26,30 +29,66 @@
   const useFirebase = true; // Set to true after Firebase setup
   let database = null;
   let firebaseConnected = false;
+  let firebaseSyncInitialized = false;
 
-  // Initialize Firebase if enabled
-  if (useFirebase && typeof firebase !== 'undefined') {
+  // Check Firebase availability and initialize
+  function attemptFirebaseInit() {
+    if (!useFirebase) {
+      console.log('Firebase disabled (useFirebase = false)');
+      return;
+    }
+    
+    if (firebaseSyncInitialized) {
+      console.log('Firebase already initialized');
+      return;
+    }
+    
+    if (typeof firebase === 'undefined') {
+      console.error('❌ Firebase SDK not available. Scripts may not have loaded.');
+      return;
+    }
+
     const firebaseConfig = {      
       apiKey: "AIzaSyDoshcaWfW3V4gkdJx6Lvtk5hxCgp70UTo",
       authDomain: "olom-3f4a7.firebaseapp.com",
       projectId: "olom-3f4a7",
       storageBucket: "olom-3f4a7.firebasestorage.app",
       messagingSenderId: "281592215073",
+      appId: "1:281592215073:web:1a247b8b57326675509560",
+      measurementId: "G-WF8Y2KXPSQ"
     };
+
     try {
+      console.log('Initializing Firebase with config:', firebaseConfig.projectId);
       const app = firebase.initializeApp(firebaseConfig);
       database = firebase.database(app);
+      console.log('✅ Firebase initialized successfully');
+      
+      // Monitor connection state
       database.ref('.info/connected').on('value', (snapshot) => {
         firebaseConnected = snapshot.val();
-        console.log('Firebase connected:', firebaseConnected);
-        if (firebaseConnected && database) {
-          initializeStudentSync();
-        }
+        const status = firebaseConnected ? '✅ CONNECTED' : '⏸ DISCONNECTED';
+        console.log('Firebase real-time connection:', status);
       });
+
+      // Initialize student sync
+      if (typeof initializeStudentSync === 'function') {
+        initializeStudentSync();
+        firebaseSyncInitialized = true;
+        console.log('✅ Firebase student sync initialized');
+      } else {
+        console.error('❌ initializeStudentSync function not found');
+      }
     } catch (e) {
-      console.warn('Firebase not configured. Using localStorage only.');
+      console.error('❌ Firebase initialization error:', {
+        message: e.message,
+        code: e.code,
+        stack: e.stack
+      });
     }
   }
+
+  // Firebase will be initialized after all functions are defined (at end of file)
 </script>
 <style>
   :root {
@@ -1379,7 +1418,7 @@
   <a href="#home" class="nav-logo">
     <div class="nav-logo-icon">🌙</div>
     <div class="nav-logo-text">
-      <span class="main-title">AI شريك جيد لا بديل للإنسان</span>
+      <span class="main-title">AI شريك لا بديل للإنسان</span>
       <span class="sub-title">منصة علوم العربية | جامعة ابن خلدون تيارت</span>
     </div>
   </a>
@@ -2707,7 +2746,12 @@
     localStorage.setItem('platform_requests', JSON.stringify(requests));
     // Also sync to Firebase if available
     if (useFirebase && firebaseConnected && database) {
-      database.ref('students').set(requests).catch(err => {
+      // Convert array to object to work better with Firebase
+      const firebaseData = {};
+      requests.forEach((req, index) => {
+        firebaseData[index] = req;
+      });
+      database.ref('students').set(firebaseData).catch(err => {
         console.error('Firebase sync error:', err);
       });
     }
@@ -2719,13 +2763,20 @@
     // Listen to Firebase changes and update locally
     database.ref('students').on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data && Array.isArray(data)) {
-        requests = data;
-        localStorage.setItem('platform_requests', JSON.stringify(requests));
-        // Re-render UI if professor dashboard is open
-        if (document.getElementById('prof-dashboard') && document.getElementById('prof-dashboard').style.display === 'block') {
-          renderRequests();
-          updateCounts();
+      if (data) {
+        // Convert Firebase object back to array
+        const newRequests = Array.isArray(data) 
+          ? data 
+          : Object.values(data).filter(item => item && typeof item === 'object');
+        
+        if (newRequests.length > 0) {
+          requests = newRequests;
+          localStorage.setItem('platform_requests', JSON.stringify(requests));
+          // Re-render UI if professor dashboard is open
+          if (document.getElementById('prof-dashboard') && document.getElementById('prof-dashboard').style.display === 'block') {
+            renderRequests();
+            updateCounts();
+          }
         }
       }
     }, (error) => {
@@ -2772,6 +2823,9 @@
     }
   }
 
+  // Store Firebase listener for cleanup
+  let dashboardFirebaseListener = null;
+
   function showProfDashboard() {
     document.getElementById('prof-dashboard').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -2782,11 +2836,40 @@
     renderExamsList();
     renderQuestionBank();
     renderResults();
+    
+    // Set up real-time Firebase listener for professor dashboard
+    if (useFirebase && firebaseConnected && database && !dashboardFirebaseListener) {
+      dashboardFirebaseListener = database.ref('students').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          // Convert Firebase object back to array
+          const newRequests = Array.isArray(data) 
+            ? data 
+            : Object.values(data).filter(item => item && typeof item === 'object');
+          
+          if (newRequests.length > 0 && JSON.stringify(newRequests) !== JSON.stringify(requests)) {
+            requests = newRequests;
+            localStorage.setItem('platform_requests', JSON.stringify(requests));
+            // Re-render UI immediately
+            renderRequests();
+            updateCounts();
+          }
+        }
+      }, (error) => {
+        console.error('Firebase dashboard listener error:', error);
+      });
+    }
   }
 
   function profLogout() {
     document.getElementById('prof-dashboard').style.display = 'none';
     document.body.style.overflow = '';
+    
+    // Clean up Firebase listener when dashboard closes
+    if (useFirebase && database && dashboardFirebaseListener) {
+      database.ref('students').off('value', dashboardFirebaseListener);
+      dashboardFirebaseListener = null;
+    }
   }
 
   // =============================================
@@ -3675,6 +3758,39 @@
     bar.style.width = '0%';
     observer.observe(bar);
   });
+
+  // =============================================
+  // INITIALIZE FIREBASE (after all functions defined)
+  // =============================================
+  console.log('Page loaded, attempting Firebase initialization...');
+  
+  // Wait a bit for Firebase SDK to load, then initialize
+  function finalizeFirebaseInit() {
+    const firebaseReady = typeof firebase !== 'undefined';
+    const functionsReady = typeof initializeStudentSync === 'function';
+    
+    console.log('Firebase Readiness Check:', {
+      firebaseSDKLoaded: firebaseReady ? '✅' : '❌',
+      functionsLoaded: functionsReady ? '✅' : '❌'
+    });
+    
+    if (firebaseReady && functionsReady) {
+      console.log('✅ All dependencies ready, initializing Firebase...');
+      attemptFirebaseInit();
+    } else {
+      console.log('⏳ Waiting for dependencies... retrying in 200ms');
+      setTimeout(finalizeFirebaseInit, 200);
+    }
+  }
+
+  // Start initialization when DOM is ready
+  if (document.readyState === 'loading') {
+    console.log('DOM still loading, waiting for DOMContentLoaded event...');
+    document.addEventListener('DOMContentLoaded', finalizeFirebaseInit);
+  } else {
+    console.log('DOM already ready, initializing immediately...');
+    finalizeFirebaseInit();
+  }
 </script>
 </body>
 </html>
