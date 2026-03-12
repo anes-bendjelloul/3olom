@@ -11,6 +11,45 @@
   (function(){
     emailjs.init({ publicKey: "qoNDx6Phq2D94Gfug" });
   })();
+
+  
+
+  // =============================================
+  // FIREBASE CONFIGURATION (Optional - for shared data)
+  // To enable Firebase sync across browsers:
+  // 1. Create a Firebase project at https://console.firebase.google.com
+  // 2. Create a Realtime Database
+  // 3. Update the config below with your credentials
+  // 4. Uncomment the Firebase script tags in the head section
+  // =============================================
+  
+  const useFirebase = true; // Set to true after Firebase setup
+  let database = null;
+  let firebaseConnected = false;
+
+  // Initialize Firebase if enabled
+  if (useFirebase && typeof firebase !== 'undefined') {
+    const firebaseConfig = {      
+      apiKey: "AIzaSyDoshcaWfW3V4gkdJx6Lvtk5hxCgp70UTo",
+      authDomain: "olom-3f4a7.firebaseapp.com",
+      projectId: "olom-3f4a7",
+      storageBucket: "olom-3f4a7.firebasestorage.app",
+      messagingSenderId: "281592215073",
+    };
+    try {
+      const app = firebase.initializeApp(firebaseConfig);
+      database = firebase.database(app);
+      database.ref('.info/connected').on('value', (snapshot) => {
+        firebaseConnected = snapshot.val();
+        console.log('Firebase connected:', firebaseConnected);
+        if (firebaseConnected && database) {
+          initializeStudentSync();
+        }
+      });
+    } catch (e) {
+      console.warn('Firebase not configured. Using localStorage only.');
+    }
+  }
 </script>
 <style>
   :root {
@@ -2110,6 +2149,9 @@
         <li><a href="#" onclick="showDashSection('exams')" class="prof-nav-link" id="nav-exams" style="display:flex;align-items:center;gap:0.6rem;padding:0.65rem 1.25rem;color:rgba(255,255,255,0.55);text-decoration:none;font-size:0.85rem;transition:all 0.15s;">
           <span>📝</span> إدارة الاختبارات
         </a></li>
+        <li><a href="#" onclick="showDashSection('help')" class="prof-nav-link" id="nav-help" style="display:flex;align-items:center;gap:0.6rem;padding:0.65rem 1.25rem;color:rgba(255,255,255,0.55);text-decoration:none;font-size:0.85rem;transition:all 0.15s;">
+          <span>❓</span> مساعدة
+        </a></li>
       </ul>
     </div>
 
@@ -2127,6 +2169,9 @@
             <button onclick="filterRequests('all')" id="filter-all" class="filter-btn active-filter" style="padding:0.4rem 0.9rem;border-radius:6px;border:1px solid var(--parchment-dark);background:var(--teal);color:#fff;font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;">الكل</button>
             <button onclick="filterRequests('accepted')" id="filter-accepted" class="filter-btn" style="padding:0.4rem 0.9rem;border-radius:6px;border:1px solid var(--parchment-dark);background:#fff;color:var(--text-muted);font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;">✅ نشط</button>
             <button onclick="filterRequests('rejected')" id="filter-rejected" class="filter-btn" style="padding:0.4rem 0.9rem;border-radius:6px;border:1px solid var(--parchment-dark);background:#fff;color:var(--text-muted);font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;">🚫 محظور</button>
+            <button onclick="exportStudentData()" style="padding:0.4rem 0.9rem;border-radius:6px;border:1px solid var(--gold);background:#fff;color:var(--gold-dark);font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;font-weight:700;">💾 تصدير البيانات</button>
+            <button onclick="document.getElementById('import-file').click()" style="padding:0.4rem 0.9rem;border-radius:6px;border:1px solid var(--gold);background:#fff;color:var(--gold-dark);font-family:'Cairo',sans-serif;font-size:0.8rem;cursor:pointer;font-weight:700;">📥 استيراد البيانات</button>
+            <input type="file" id="import-file" style="display:none;" accept=".json" onchange="importStudentData(event)">
           </div>
         </div>
 
@@ -2158,8 +2203,77 @@
 
       <!-- ===== SECTION: STUDENTS (merged into requests) ===== -->
       <div id="section-students" style="display:none;">
-        <h2 style="font-size:1.4rem;font-weight:700;color:var(--text-main);margin-bottom:0.2rem;">👥 الطلبة النشطون</h2>
+        <h2 style="font-size:1.4rem;font-weight:700;color:var(--text-main);margin-bottom:0.5rem;">👥 الطلبة النشطون</h2>
         <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;">راجع قسم إدارة الطلبة للحظر ورفع الحظر</p>
+      </div>
+
+      <!-- ===== SECTION: HELP (مساعدة) ===== -->
+      <div id="section-help" style="display:none;">
+        <h2 style="font-size:1.4rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;">❓ مساعدة – مشاركة البيانات بين الأجهزة</h2>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;">
+          <!-- Method 1: Export/Import -->
+          <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.75rem;border-top:4px solid var(--gold);">
+            <h3 style="font-size:1.1rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;">
+              <span>💾</span> الطريقة 1: التصدير والاستيراد
+            </h3>
+            <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.8;margin-bottom:1rem;">
+              هذه الطريقة تعمل فوراً ولا تحتاج لإعدادات معقدة. استخدمها لمشاركة البيانات مع زملاء آخرين.
+            </p>
+            <div style="background:var(--teal-pale);border-radius:10px;padding:1rem;border-right:4px solid var(--teal);">
+              <p style="font-size:0.85rem;color:var(--teal);margin:0;line-height:1.7;">
+                <strong>🔹 الخطوات:</strong><br>
+                1. اضغط "💾 تصدير البيانات" لتنزيل ملف بيانات الطلبة<br>
+                2. انقل الملف إلى الأستاذ أو الشخص الآخر<br>
+                3. هو يضغط "📥 استيراد البيانات" ويختار الملف<br>
+                4. البيانات ستُحدث عنده فوراً ✅
+              </p>
+            </div>
+            <p style="font-size:0.8rem;color:#92400e;margin-top:1rem;padding:0.75rem;background:#fef3c7;border-radius:8px;">
+              ⚠️ <strong>ملاحظة:</strong> عند تصدير، يتم حفظ جميع بيانات الطلبة في ملف JSON يمكن مشاركته بسهولة.
+            </p>
+          </div>
+
+          <!-- Method 2: Firebase -->
+          <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.75rem;border-top:4px solid var(--teal);">
+            <h3 style="font-size:1.1rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;">
+              <span>🔄</span> الطريقة 2: مزامنة فورية (Firebase)
+            </h3>
+            <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.8;margin-bottom:1rem;">
+              هذه الطريقة توفر مزامنة فورية بين كل المستخدمين بدون تدخل يدوي (أفضل للفريق الدائم).
+            </p>
+            <div style="background:var(--teal-pale);border-radius:10px;padding:1rem;border-right:4px solid var(--teal);">
+              <p style="font-size:0.82rem;color:var(--teal);margin:0;line-height:1.6;">
+                <strong>🔹 الإعداد:</strong><br>
+                1. اذهب إلى <a href="https://console.firebase.google.com" target="_blank" style="color:var(--teal);font-weight:700;text-decoration:underline;">Firebase Console</a><br>
+                2. أنشئ مشروع جديد<br>
+                3. أضف Realtime Database<br>
+                4. انسخ بيانات المشروع (API Key, Project ID, إلخ)<br>
+                5. اتصل بالمطور لتحديث الإعدادات في الكود
+              </p>
+            </div>
+            <p style="font-size:0.75rem;color:#6b7280;margin-top:1rem;padding:0.75rem;background:#f3f4f6;border-radius:8px;">
+              💡 Firebase مجاني ✓ | آمن ✓ | سريع جداً ✓
+            </p>
+          </div>
+        </div>
+
+        <!-- Current Status -->
+        <div style="background:#fff;border:1px solid var(--parchment-dark);border-radius:14px;padding:1.75rem;">
+          <h3 style="font-size:1rem;font-weight:700;color:var(--text-main);margin-bottom:1rem;">🔍 الحالة الحالية</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div style="padding:1rem;background:#fee2e2;border:1px solid #f87171;border-radius:8px;">
+              <p style="font-size:0.85rem;font-weight:700;color:#991b1b;margin:0;">
+                ${useFirebase && firebaseConnected ? '✅ Firebase مفعّل' : '⏸ استخدام localStorage فقط'}
+              </p>
+            </div>
+            <div style="padding:1rem;background:#dbeafe;border:1px solid #0284c7;border-radius:8px;">
+              <p style="font-size:0.85rem;font-weight:700;color:#1e40af;margin:0;">
+                💾 تصدير/استيراد متاح
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ===== SECTION: STATS ===== -->
@@ -2575,7 +2689,7 @@
   let searchTerm = '';
 
   // =============================================
-  // LOCALSTORAGE MANAGEMENT
+  // LOCALSTORAGE + FIREBASE MANAGEMENT
   // =============================================
   function loadRequestsFromStorage() {
     const stored = localStorage.getItem('platform_requests');
@@ -2591,6 +2705,32 @@
 
   function saveRequestsToStorage() {
     localStorage.setItem('platform_requests', JSON.stringify(requests));
+    // Also sync to Firebase if available
+    if (useFirebase && firebaseConnected && database) {
+      database.ref('students').set(requests).catch(err => {
+        console.error('Firebase sync error:', err);
+      });
+    }
+  }
+
+  function initializeStudentSync() {
+    if (!useFirebase || !database) return;
+    
+    // Listen to Firebase changes and update locally
+    database.ref('students').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && Array.isArray(data)) {
+        requests = data;
+        localStorage.setItem('platform_requests', JSON.stringify(requests));
+        // Re-render UI if professor dashboard is open
+        if (document.getElementById('prof-dashboard') && document.getElementById('prof-dashboard').style.display === 'block') {
+          renderRequests();
+          updateCounts();
+        }
+      }
+    }, (error) => {
+      console.error('Firebase read error:', error);
+    });
   }
 
   // Load data on page load
@@ -3035,7 +3175,7 @@
   // DASHBOARD NAVIGATION
   // =============================================
   function showDashSection(name) {
-    ['requests','students','stats','content','exams'].forEach(s => {
+    ['requests','students','stats','content','exams','help'].forEach(s => {
       document.getElementById('section-'+s).style.display = s===name ? 'block' : 'none';
     });
     document.querySelectorAll('.prof-nav-link').forEach(l => {
@@ -3146,6 +3286,59 @@
       rejected: '🚫 تم حظر الطالب'
     };
     showToast(msgs[newStatus] || 'تم تحديث الحالة');
+  }
+
+  // =============================================
+  // EXPORT/IMPORT DATA
+  // =============================================
+  function exportStudentData() {
+    const dataToExport = {
+      students: requests,
+      exportDate: new Date().toISOString(),
+      version: 1
+    };
+    const dataStr = JSON.stringify(dataToExport, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `platform-students-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('✅ تم تصدير البيانات بنجاح');
+  }
+
+  function importStudentData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const content = e.target.result;
+        const data = JSON.parse(content);
+        
+        if (data.students && Array.isArray(data.students)) {
+          requests = data.students;
+          nextRequestId = Math.max(...requests.map(r => r.id), 0) + 1;
+          saveRequestsToStorage();
+          renderRequests();
+          updateCounts();
+          showToast('✅ تم استيراد البيانات بنجاح');
+        } else {
+          showToast('❌ صيغة الملف غير صحيحة');
+        }
+      } catch (err) {
+        console.error('Import error:', err);
+        showToast('❌ خطأ في استيراد البيانات: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    document.getElementById('import-file').value = '';
   }
 
   // =============================================
@@ -3270,6 +3463,18 @@
 
     try {
       await emailjs.send('service_0sdfq3c', 'template_eqoex0k', templateParams);
+      
+      // Send admin notification
+      const adminParams = {
+        student_name:  name,
+        student_email: email,
+        student_id:    id,
+        student_major: major,
+        student_year:  year,
+        admin_email:   'aneskingfu359@gmail.com',
+      };
+      await emailjs.send('service_0sdfq3c', 'template_rsm6s95', adminParams);
+      
       // Success
       document.getElementById('register-form-body').style.display = 'none';
       document.getElementById('register-success').style.display   = 'block';
